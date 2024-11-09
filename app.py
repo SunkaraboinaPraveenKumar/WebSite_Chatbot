@@ -68,8 +68,19 @@ if st.button("Generate Embeddings"):
                 "metadata": {"text": chunk.page_content}
             })
 
-        # Upsert vectors to Pinecone
-        index.upsert(vectors)
+        if index_name in pc.list_indexes().names():
+            st.write("Index exists and is ready.")
+        else:
+            st.error("Index not found or failed to create.")
+
+        st.write(f"Pinecone API Key: {os.getenv('PINECONE_API_KEY')}")
+        batch_size = 100
+        for i in range(0, len(vectors), batch_size):
+            batch = vectors[i:i + batch_size]
+            index.upsert(batch)
+
+        # # Upsert vectors to Pinecone
+        # index.upsert(vectors)
         st.write(f"Total documents in Pinecone: {len(vectors)}")
 
 # If embeddings are available, show the chat interface
